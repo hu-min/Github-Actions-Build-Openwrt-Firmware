@@ -1,0 +1,171 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: HuMin
+# Blog: http://tqay.com/
+#=================================================
+
+name: Build OpenWrt Firmware
+
+on:
+#  release:
+#    types: [published]
+#  push:
+#    branches:
+#      - master
+    paths:
+      - ".config"
+#  schedule:
+#    - cron: 0 8 * * 5
+#  watch:
+#    types: [started]
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+
+    - name: Checkout 
+      uses: actions/checkout@master
+
+    - name: Initialization environment 初始化编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        echo "Deleting files, please wait ..."
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d/*
+        sudo swapoff /swapfile
+        sudo rm -f /swapfile
+        #docker rmi `docker images -q`
+        #sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+    - name: Clone source code 复制仓库的源代码
+      env: 
+         REPO_URL: https://github.com/coolsnowwolf/lede
+         REPO_BRANCH: master
+      run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+
+    - name: Update feeds 更新源
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Install feeds 安装源
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: Custom 个性化设置一些文件
+      run: |
+          cd openwrt
+          ## sed -i 's/被替换的内容/要替换成的内容/' package/lean/default-settings/files/zzz-default-setting
+          #sed -i 's/0x3c0000/0x7b0000/g' target\/linux\/ramips\/dts\/mt7621a_phicomm_psg1218.dtsi #4M:0x3c0000 8M:0x7b0000 16M:0xfb0000
+          #sed -i 's/7872k/16064k/g' target\/linux\/ramips\/image\/mt7621.mk 
+          sed -i '/tl-wr703n-v1/{n;s/tplink-4mlzma/tplink-8mlzma/;}'  target\/linux\/ar71xx\/image\/tiny-tp-link.mk #修改4M为8M
+          sed -i 's/R20.2.15/By HuMin/' package\/lean\/default-settings\/files\/zzz-default-settings
+          sed -i 's/192.168.1.1/192.168.5.55/' package\/base-files\/files\/bin\/config_generate
+          sed -i 's/pcdata(ver.luciname)/"路由器"/' feeds\/luci\/modules\/luci-mod-admin-full\/luasrc\/view\/admin_status\/index.htm
+          sed -i 's/pcdata(ver.luciversion)/"2020-03-07"/' feeds\/luci\/modules\/luci-mod-admin-full\/luasrc\/view\/admin_status\/index.htm
+          sed -i 's/OpenWrt/Router/' package\/base-files\/files\/bin\/config_generate
+          sed -i 's/.ssid=OpenWrt/.ssid=WiFi/' package\/kernel\/mac80211\/files\/lib\/wifi\/mac80211.sh
+          sed -i 's/.encryption=none/.encryption=psk2\n	    		set wireless.default_radio\${devidx}.key=password\n/' package\/kernel\/mac80211\/files\/lib\/wifi\/mac80211.sh
+
+#    - name: Custom Applications 增加应用软件
+#      run: |
+#          cd openwrt/package
+#          git clone https://github.com/Baozisoftware/luci-app-koolproxy
+#          git clone https://github.com/vernesong/OpenClash.git
+#          git clone https://github.com/destan19/OpenAppFilter.git
+#          git clone https://github.com/tty228/luci-app-serverchan.git
+#          git clone https://github.com/BoringCat/luci-app-mentohust.git
+#          #git clone https://github.com/ilya-fedin/pihole-openwrt.git
+
+    - name: Load custom configuration 加载自定义编译配置文件
+      env:
+         CONFIG_FILE: ".config"
+         DIY_SH: "diy.sh"
+      run: |
+         [ -e files ] && mv files openwrt/files
+         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+         chmod +x $DIY_SH
+         cd openwrt
+         ../$DIY_SH
+         make defconfig
+
+#    - name: SSH connection to Actions 用SSH连接到终端控制台
+#      uses: Tony268/debugger-action@master
+
+    - name: Download package 下载软件包
+      run: |
+         cd openwrt && make download -j8
+         find dl -size -1024c -exec ls -l {} \;
+         find dl -size -1024c -exec rm -f {} \;
+
+    - name: Multi-thread compile 多线程编译
+      run: |
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+         make -j$(nproc)
+
+    - name: Single-thread compile 单线程编译
+      if: failure()
+      run: |
+         cd openwrt
+         make -j1 V=s
+
+    - name: Upload bin directory 上传固件相关软件包
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+         name: Packages
+         path: openwrt/bin
+
+    - name: Upload .config file 组织要上传.config配置文件
+      run: |
+           mkdir -p openwrt/artifact
+           cp openwrt/.config openwrt/artifact/Firmware.config
+
+    - name: Upload .config file 上传编译配置文件
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+         name: Firmware_config
+         path: openwrt/artifact
+
+    - name: Upload imagebuilder file 组织要上传SDK文件
+      run: |
+         mkdir -p openwrt/imagebuilder
+         mv openwrt/bin/targets/*/*/openwrt-imagebuilder-*-tiny.Linux-x86_64.tar.xz openwrt/imagebuilder/
+
+    - name: Upload SDK file 上传编译配置文件
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+         name: Firmware_imagebuilder
+         path: openwrt/imagebuilder
+
+    - name: Upload SDK file 组织要上传SDK文件
+      run: |
+           mkdir -p openwrt/sdk
+           mv openwrt/bin/targets/*/*/openwrt-sdk-*-tiny.Linux-x86_64.tar.xz openwrt/sdk/
+
+    - name: Upload SDK file 上传编译配置文件
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+         name: Firmware_SDK
+         path: openwrt/sdk
+
+    - name: Organize files 组织要上传的文件
+      if: always()
+      run: |  
+         cd openwrt/bin/targets/*/*
+         rm -rf packages
+         echo "::set-env name=FIRMWARE::$(pwd)"
+
+    - name: Upload firmware 上传固件文件
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+         name: Firmware
+         path: ${{ env.FIRMWARE }}
