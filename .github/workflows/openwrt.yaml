@@ -119,7 +119,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: always()
       with:
-         name: Packages
+         name: ALL_compile
          path: openwrt/bin
 
     - name: Upload .config file 组织要上传.config配置文件
@@ -140,7 +140,7 @@ jobs:
     - name: Upload imagebuilder file 组织要上传SDK文件
       run: |
          mkdir -p openwrt/imagebuilder
-         mv openwrt/bin/targets/*/*/openwrt-imagebuilder-*-tiny.Linux-x86_64.tar.xz openwrt/imagebuilder/
+         mv openwrt/bin/targets/*/*/openwrt-imagebuilder-*.Linux-x86_64.tar.xz openwrt/imagebuilder/
 
     - name: Upload imagebuilder file 上传编译配置文件
       uses: actions/upload-artifact@master
@@ -161,12 +161,12 @@ jobs:
          name: Firmware_SDK
          path: openwrt/sdk
 
-    - name: Upload squashfs-sysupgrade file 组织要上传刷机文件
+    - name: Upload squashfs-sysupgrade file 组织要上传的刷机包
       run: |
            mkdir -p openwrt/squashfs-sysupgrade
            cp openwrt/bin/targets/*/*/openwrt-*-squashfs-sysupgrade.bin openwrt/squashfs-sysupgrade/
 
-    - name: Upload squashfs-sysupgrade file 上传编译配置文件
+    - name: Upload squashfs-sysupgrade file 上传刷机包文件
       uses: actions/upload-artifact@master
       if: always()
       with:
