@@ -152,7 +152,7 @@ jobs:
     - name: Upload SDK file 组织要上传SDK文件
       run: |
            mkdir -p openwrt/sdk
-	   mv openwrt/bin/targets/*/*/openwrt-sdk-*.Linux-x86_64.tar.xz openwrt/sdk/
+           mv openwrt/bin/targets/*/*/openwrt-sdk-*.Linux-x86_64.tar.xz openwrt/sdk/
 
     - name: Upload SDK file 上传编译配置文件
       uses: actions/upload-artifact@master
@@ -164,7 +164,7 @@ jobs:
     - name: Upload squashfs-sysupgrade file 组织要上传的刷机包
       run: |
            mkdir -p openwrt/squashfs_sysupgrade
-	   cp openwrt/bin/targets/*/*/*squashfs-sysupgrade.bin openwrt/squashfs_sysupgrade/
+           cp openwrt/bin/targets/*/*/*squashfs-sysupgrade.bin openwrt/squashfs_sysupgrade/
 
     - name: Upload squashfs_sysupgrade file 上传刷机包文件
       uses: actions/upload-artifact@master
