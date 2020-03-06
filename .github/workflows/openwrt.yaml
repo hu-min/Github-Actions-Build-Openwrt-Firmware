@@ -126,9 +126,9 @@ jobs:
       run: |
          mkdir -p openwrt/artifact
          cp openwrt/.config openwrt/artifact/
-	 cp openwrt/install-*.log openwrt/artifact/
-	 cp openwrt/bin/targets/*/*/config.seed  openwrt/artifact/
-	 cp openwrt/bin/targets/*/*/*.manifest  openwrt/artifact/
+         cp openwrt/install-*.log openwrt/artifact/
+         cp openwrt/bin/targets/*/*/config.seed  openwrt/artifact/
+         cp openwrt/bin/targets/*/*/*.manifest  openwrt/artifact/
 
     - name: Upload .config file 上传编译配置文件
       uses: actions/upload-artifact@master
