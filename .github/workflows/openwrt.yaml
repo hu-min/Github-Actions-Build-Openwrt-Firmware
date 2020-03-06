@@ -67,13 +67,13 @@ jobs:
           #sed -i 's/0x3c0000/0x7b0000/g' target\/linux\/ramips\/dts\/mt7621a_phicomm_psg1218.dtsi #4M:0x3c0000 8M:0x7b0000 16M:0xfb0000
           #sed -i 's/7872k/16064k/g' target\/linux\/ramips\/image\/mt7621.mk 
           sed -i '/tl-wr703n-v1/{n;s/tplink-4mlzma/tplink-8mlzma/;}'  target\/linux\/ar71xx\/image\/tiny-tp-link.mk #修改4M为8M
-          sed -i 's/R20.2.15/By HuMin/' package\/lean\/default-settings\/files\/zzz-default-settings
+          sed -i 's/R20.3.5/ By HuMin/' package\/lean\/default-settings\/files\/zzz-default-settings
           sed -i 's/192.168.1.1/192.168.5.55/' package\/base-files\/files\/bin\/config_generate
           sed -i 's/pcdata(ver.luciname)/"路由器"/' feeds\/luci\/modules\/luci-mod-admin-full\/luasrc\/view\/admin_status\/index.htm
           sed -i 's/pcdata(ver.luciversion)/"2020-03-07"/' feeds\/luci\/modules\/luci-mod-admin-full\/luasrc\/view\/admin_status\/index.htm
           sed -i 's/OpenWrt/Router/' package\/base-files\/files\/bin\/config_generate
           sed -i 's/.ssid=OpenWrt/.ssid=WiFi/' package\/kernel\/mac80211\/files\/lib\/wifi\/mac80211.sh
-          sed -i 's/.encryption=none/.encryption=psk2\n	    		set wireless.default_radio\${devidx}.key=password\n/' package\/kernel\/mac80211\/files\/lib\/wifi\/mac80211.sh
+          sed -i 's/.encryption=none/.encryption=psk2\n	    		set wireless.default_radio\${devidx}.key=37214728\n/' package\/kernel\/mac80211\/files\/lib\/wifi\/mac80211.sh
 
 #    - name: Custom Applications 增加应用软件
 #      run: |
