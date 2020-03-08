@@ -3,7 +3,7 @@ on:
   release:
     types: [created]
     paths:
-      - 'on'
+      - '.on'
 #  watch:
 #    types: started
 
