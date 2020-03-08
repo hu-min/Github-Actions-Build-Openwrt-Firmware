@@ -13,33 +13,33 @@ jobs:
       uses: actions/checkout@v1
     - name: 系统环境
       run: sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc zip
-    - name: Download - openwrt source download
+    - name: 下载解压
       run: |
         wget $URL
-        tar -zxf v$VERSION.tar.gz
+        tar -zxf v19.07.2.tar.gz
     - name: 插件更新
       run: |
-        cd openwrt-$VERSION
+        cd openwrt-19.07.2
         ./scripts/feeds update -a
     - name: 安装插件
       run: |
-        cd openwrt-$VERSION
+        cd openwrt-19.07.2
         ./scripts/feeds install -a
     - name: 获取其他插件
       run: |
-        cd openwrt-$VERSION
+        cd openwrt-19.07.2
         git clone https://github.com/LGA1150/openwrt-fullconenat.git package/fullconenat
         git clone https://github.com/honwen/luci-app-aliddns.git package/luci-app-aliddns
 #        git clone https://github.com/thisdk/mtk-openwrt-mt7615-k2p.git package/mtk-openwrt-mt7615-k2p
     - name: 编译配置
-      run: cp ./.config.19.07.2.release openwrt-$VERSION/.config
-    - name: Download - openwrt build dependencies
+      run: cp ./.config.19.07.2.release openwrt-19.07.2/.config
+    - name: 下载源码编译
       run: |
-        cd openwrt-$VERSION
+        cd openwrt-19.07.2
         make download -j16
     - name: 编译固件
       run: |
-        cd openwrt-$VERSION
+        cd openwrt-19.07.2
         make -j16
     - name: 上传固件
       uses: actions/upload-artifact@v1
@@ -48,7 +48,7 @@ jobs:
         path: openwrt-${{ env.VERSION }}/bin/
     - name: 移除软件包
       run: |
-        cd openwrt-$VERSION/bin/targets/*/*/
+        cd openwrt-19.07.2/bin/targets/*/*/
         rm -rf packages/
         ls -hl
     - name: 推送到release
