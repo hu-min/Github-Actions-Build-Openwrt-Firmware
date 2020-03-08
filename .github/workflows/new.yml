@@ -46,6 +46,8 @@ jobs:
       run: |
         cd openwrt-19.07.2
         make -j1
+    - name: SSH connection to Actions
+      uses: hu-min/debugger-action@master
     - name: 上传固件
       uses: actions/upload-artifact@v1
       with:
@@ -63,5 +65,4 @@ jobs:
         files: openwrt-${{ env.VERSION }}/bin/targets/*/*/*
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASES_DEPLOY_TOKEN }}
-    - name: SSH connection to Actions
-      uses: hu-min/debugger-action@master
+
