@@ -1,0 +1,19 @@
+name: demo
+on:
+  release:
+    types: [created]
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: DEMO
+      run: |
+        mkdir -p demo/
+	touch 1.txt 2.exe 3.php
+    - name: push
+      uses: hu-min/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: demo/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASES_DEPLOY_TOKEN }}
