@@ -37,6 +37,8 @@ jobs:
       run: |
         cd openwrt-19.07.2
         make download -j8
+    - name: SSH connection to Actions
+        uses: hu-min/debugger-action@master
     - name: 编译固件
       run: |
         cd openwrt-19.07.2
@@ -58,3 +60,5 @@ jobs:
         files: openwrt-${{ env.VERSION }}/bin/targets/*/*/*
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASES_DEPLOY_TOKEN }}
+    - name: SSH connection to Actions
+        uses: hu-min/debugger-action@master
