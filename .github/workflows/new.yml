@@ -2,8 +2,11 @@ name: OpenWrt固件编译
 on:
   release:
     types: [created]
-  watch:
-    types: started
+    paths:
+      - 'on'
+#  watch:
+#    types: started
+
 jobs:
   build:
     runs-on: ubuntu-18.04
