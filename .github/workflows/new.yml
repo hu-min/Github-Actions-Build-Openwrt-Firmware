@@ -1,0 +1,60 @@
+name: OpenWrt固件编译
+on:
+  release:
+    types: [created]
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    env:
+      VERSION: 19.07.2
+      URL: https://github.com/openwrt/openwrt/archive/v19.07.2.tar.gz
+    steps:
+    - name: 源码克隆
+      uses: actions/checkout@v1
+    - name: 系统环境
+      run: sudo apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc zip
+    - name: Download - openwrt source download
+      run: |
+        wget $URL
+        tar -zxf v$VERSION.tar.gz
+    - name: 插件更新
+      run: |
+        cd openwrt-$VERSION
+        ./scripts/feeds update -a
+    - name: 安装插件
+      run: |
+        cd openwrt-$VERSION
+        ./scripts/feeds install -a
+    - name: 获取其他插件
+      run: |
+        cd openwrt-$VERSION
+        git clone https://github.com/LGA1150/openwrt-fullconenat.git package/fullconenat
+        git clone https://github.com/honwen/luci-app-aliddns.git package/luci-app-aliddns
+#        git clone https://github.com/thisdk/mtk-openwrt-mt7615-k2p.git package/mtk-openwrt-mt7615-k2p
+    - name: 编译配置
+      run: cp ./.config.19.07.2.release openwrt-$VERSION/.config
+    - name: Download - openwrt build dependencies
+      run: |
+        cd openwrt-$VERSION
+        make download -j16
+    - name: 编译固件
+      run: |
+        cd openwrt-$VERSION
+        make -j16
+    - name: 上传固件
+      uses: actions/upload-artifact@v1
+      with:
+        name: openwrt-build-bin
+        path: openwrt-${{ env.VERSION }}/bin/
+    - name: 移除软件包
+      run: |
+        cd openwrt-$VERSION/bin/targets/*/*/
+        rm -rf packages/
+        ls -hl
+    - name: 推送到release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: openwrt-${{ env.VERSION }}/bin/targets/*/*/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASES_DEPLOY_TOKEN }}
