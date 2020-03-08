@@ -9,7 +9,10 @@ jobs:
     - name: DEMO
       run: |
             mkdir -p demo/
+            cd demo/
             touch 1.txt 2.exe 3.php
+            echo "1" >2.yu
+            echo "e3l" > 4.df
 
     - name: Release
       uses: softprops/action-gh-release@v1
