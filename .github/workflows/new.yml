@@ -58,6 +58,11 @@ jobs:
         cd openwrt-19.07.2/bin/targets/*/*/
         rm -rf packages/
         ls -hl
+        
+    - name: 组织文件
+      run: |
+        cp openwrt-19.07.2/.config openwrt-19.07.2/bin/targets/*/*/
+       
     - name: 推送到release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
