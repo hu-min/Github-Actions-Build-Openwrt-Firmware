@@ -2,8 +2,6 @@ name: OpenWrt固件编译
 on:
   release:
     types: [created]
-    paths:
-      - '.on'
 #  watch:
 #    types: started
 
