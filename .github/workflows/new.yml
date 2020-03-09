@@ -36,7 +36,7 @@ jobs:
 #        git clone https://github.com/thisdk/mtk-openwrt-mt7615-k2p.git package/mtk-openwrt-mt7615-k2p
     - name: 编译配置
       run: cp ./.config.19.07.2.release openwrt-19.07.2/.config
-    - name: 下载源码编译
+    - name: 下载编译源码包
       run: |
         cd openwrt-19.07.2
         make download -j8
