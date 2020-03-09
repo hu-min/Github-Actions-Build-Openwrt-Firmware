@@ -2,8 +2,8 @@ name: OpenWrt固件编译
 on:
   release:
     types: [created]
-#  watch:
-#    types: started
+  watch:
+    types: started
 
 jobs:
   build:
@@ -40,12 +40,12 @@ jobs:
       run: |
         cd openwrt-19.07.2
         make download -j8
-    - name: SSH connection to Actions
-      uses: hu-min/debugger-action@master
+#    - name: SSH connection to Actions
+#      uses: hu-min/debugger-action@master
     - name: 编译固件
       run: |
         cd openwrt-19.07.2
-        make -j1
+        make -j1 V=s
 #    - name: SSH connection to Actions
 #      uses: hu-min/debugger-action@master
     - name: 上传固件
